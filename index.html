@@ -660,10 +660,11 @@ base.bindings["print"] = function () {
     return arguments[arguments.length - 1];
 }
 
-function makeNode(type, cls) {
+function makeNode(type, title, cls) {
     var box = document.createElement(type);
     box.className = cls;
-    [].slice.call(arguments, 2).forEach(function (x) {
+    box.title = title;
+    [].slice.call(arguments, 3).forEach(function (x) {
         box.appendChild(x);
     });
     return box;
@@ -687,22 +688,31 @@ function simplify(node) {
 }
 
 function display(node) {
+    console.log("Displaying node", node);
     if (!node) {
-        return makeNode("span", "nil");
+        return makeNode("span", "", "nil");
     }
-    if (node.length === 3 && node[0] === null && node[2] === null) {
-        return makeNode("span", node[1].type, txt(node[1].token));
+    if (node.length === 3 && node[0] === null && node[2] === null) { // identifier
+        return makeNode("span", node[1].token || "", node[1].type, txt(node[1].token));
     }
+    let signature = node.map(function (x, i) {
+                if (i % 2 == 0)
+                    return x === null ? "_" : "E"
+                else 
+                    return x.token.replace("\n", "↵")
+            }).join(" ");
     node = simplify(node);
     if (node.length === 1) { return node[0]; }
-    var box = makeNode("span", "inner");
+    var box = makeNode("span", signature, "inner");
     node.forEach(function (x, i) {
         if (i % 2 == 1) {
-            var op = makeNode("span", "op", txt(x.token.replace("\n", "↵")));
+            var op = makeNode("span", signature, "op", txt(x.token.replace("\n", "↵")));
             box.appendChild(op);
         }
-        else
+        else {
+            if (x) x.title = signature;
             box.appendChild(x || txt(""));
+        }
     });
     return box;
 }
