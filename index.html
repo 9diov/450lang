@@ -57,10 +57,10 @@
       <textarea class=ex>
       </textarea>
       <textarea class=ex>
-        begin
-        const x = 3
-        x * 2
-        end
+begin
+  const s = "fdfd"
+  s.toUpperCase()
+end
       </textarea>
       <textarea class=ex>
         # Fibonacci
@@ -303,8 +303,8 @@ function Env(parent) {
 Env.prototype.resolve = function (sym) {
     var res = this.bindings[sym];
     // We must avoid resolving default fields of objects like toString
-    if (res !== {}[sym]) return res
-    else throw Error("Could not resolve symbol: " + sym);
+   if (res !== {}[sym]) return res
+   else throw error("could not resolve symbol: " + sym);
 };
 
 Env.prototype.register = function (guard, handler) {
@@ -390,6 +390,7 @@ var config = {
         "type:id":       [20001, 20000],
         "type:num":      [20001, 20000],
         "type:str":      [20001, 20000],
+        ".": [15000, 15001]
     },
 
     // These are all treated as bracket types. The operators between
@@ -478,10 +479,14 @@ function listify(node) {
 function normalizeCall(node) {
     // Given either "a + b" or "(+)(a, b)" this returns [+, [a, b]].
     var args;
-    if (args = extractArgs(/^[E_] [^ ]+ [E_]$/, node))
+    if (args = extractArgs(/^[E_] [^ ]+ [E_]$/, node)) {
+        console.log("calling infix operator");
         return [node.orig[1], args];
-    else if (args = extractArgs(/^E \( [E_] \) _$/, node))
+    }
+    else if (args = extractArgs(/^E \( [E_] \) _$/, node)) {
+        console.log("calling function", args, node);
         return [args[0], listify(args[1])];
+    }
     return null;
 }
 
@@ -505,6 +510,7 @@ base.register(/^[E_]( [;,\n] [E_])+$/, function (node) {
 base.register("_ ( E ) _", function (node, _, x, _) { return this.run(x); });
 base.register("_ begin E end _", function(node, _, x, _) {return this.run(x);});
 base.register(/^E \( [E_] \) _$/, function (node, f, x, _) {
+  console.log("calling on", node);
     return applyCall(this, normalizeCall(node));
 });
 
@@ -592,6 +598,12 @@ base.register("_ match E with E end _", function (node, _, expr, patterns, _) {
         if (match(expr, args[0], env)) return env.run(args[1]);
     }
     throw Error("No pattern matched.");
+});
+
+// dot operator
+base.register("E . E", function(node, obj, method) {
+console.log(".:", this.resolve(obj.token), method);
+  return this.resolve(obj.token)[method.token].bind(this.resolve(obj.token));
 });
 
 // Default fallback for unknown binary operators
