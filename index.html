@@ -735,6 +735,17 @@ var examples = document.getElementById("examples");
 });
 
 document.getElementById("evaluate").onclick = processInput;
+document.getElementById("expr").onkeydown = function(e) {
+  if (e.ctrlKey && e.keyCode == 13) {
+    processInput();
+  }
+  if (e.keyCode == 9) {
+  let { value, selectionStart, selectionEnd } = inputbox;
+    e.preventDefault();
+    inputbox.value = value.slice(0, selectionStart) + "  " + value.slice(selectionEnd);
+    inputbox.setSelectionRange(selectionStart+2, selectionStart+2)
+  }
+}
 
     </script>
   </body>
