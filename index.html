@@ -148,7 +148,7 @@ function Parser(config) {
     config.blocks.forEach(function (defs) {
         var parts = defs.split(" ");
         prio[parts.shift()] = [10000, 0];
-        prio[parts.pop()] = [0, 10001, true];
+        prio[parts.pop()] = [0, 10001, true]; // true here marks this token as suffix
         parts.forEach(function (part) {prio[part] = [0, 0];});
     });
     var level = 5;
@@ -189,6 +189,7 @@ Parser.prototype.tokenize = function (text) {
         last = tok;
     }
     results.push({token: "$", type: "boundary"});
+    console.log("tokens = ", JSON.stringify(results));
     return results;
 }
 
@@ -595,7 +596,6 @@ base.register("_ match E with E end _", function (node, _, expr, patterns, _) {
 
 // Default fallback for unknown binary operators
 base.register(/^[E_] [^ ()\[\]\{\}]+ [E_]$/, function (node) {
-  console.log("fallback", node);
     return applyCall(this, normalizeCall(node));
 });
 
