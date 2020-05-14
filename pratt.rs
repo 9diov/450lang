@@ -144,7 +144,8 @@ fn infix_binding_power(op: char) -> Option<(u8, u8)> {
         '?' => (4, 3),
         '+' | '-' => (5, 6),
         '*' | '/' => (7, 8),
-        '.' => (14, 13),
+        '(' => (13, 0),
+        '.' => (14, 15),
         _ => return None,
     };
     Some(res)
@@ -162,13 +163,19 @@ fn tests() {
     assert_eq!(s.to_string(), "(+ (+ a (* (* b c) d)) e)");
 
     let s = expr("f . g . h");
-    assert_eq!(s.to_string(), "(. f (. g h))");
+    assert_eq!(s.to_string(), "(. (. f g) h)");
 
     let s = expr(" 1 + 2 + f . g . h * 3 * 4");
     assert_eq!(
         s.to_string(),
-        "(+ (+ 1 2) (* (* (. f (. g h)) 3) 4))",
+        "(+ (+ 1 2) (* (* (. (. f g) h) 3) 4))",
     );
+
+    let s = expr("x.y(1)");
+    assert_eq!(s.to_string(), "(( (. x y) 1)");
+
+    let s = expr("x.y.(1)");
+    assert_eq!(s.to_string(), "(. (. x y) 1)");
 
     let s = expr("--1 * 2");
     assert_eq!(s.to_string(), "(* (- (- 1)) 2)");
