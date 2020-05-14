@@ -369,8 +369,8 @@ function tagPrefixOperators(tokens) {
     var prevType = "start";
     for (var token of tokens) {
         if (prevType === "start" && token.type === "open") {
-          prevType = "infix";
-          break;
+          prevType = token.type;
+          continue;
         }
         if ((token.type === "infix" || token.type === "open") &&
             (prevType === "infix" || prevType === "open")) {
