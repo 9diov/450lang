@@ -152,6 +152,7 @@ function Parser(config) {
         prio[parts.pop()] = [0, 10001, true]; // true here marks this token as suffix
         parts.forEach(function (part) {prio[part] = [0, 0];});
     });
+    prio["P:("] = [10002, 0];
     var level = 5;
     config.tower.forEach(function (ops) {
         ops[1].split(" ").forEach(function (op) {
@@ -391,7 +392,7 @@ var config = {
         "type:id":       [20001, 20000],
         "type:num":      [20001, 20000],
         "type:str":      [20001, 20000],
-        ".": [10000, 10001] // should equals blocks' priority
+        ".": [10000, 10001] // should equals "()"'s priority
     },
 
     // These are all treated as bracket types. The operators between
@@ -485,7 +486,6 @@ function normalizeCall(node) {
         return [node.orig[1], args];
     }
     else if (args = extractArgs(/^E \( [E_] \) _$/, node)) {
-        console.log("calling function", args, node);
         return [args[0], listify(args[1])];
     }
     return null;
@@ -511,7 +511,6 @@ base.register(/^[E_]( [;,\n] [E_])+$/, function (node) {
 base.register("_ ( E ) _", function (node, _, x, _) { return this.run(x); });
 base.register("_ begin E end _", function(node, _, x, _) {return this.run(x);});
 base.register(/^E \( [E_] \) _$/, function (node, f, x, _) {
-  console.log("calling on", node);
     return applyCall(this, normalizeCall(node));
 });
 
@@ -694,7 +693,6 @@ function simplify(node) {
 }
 
 function display(node) {
-    console.log("Displaying node", node);
     if (!node) {
         return makeNode("span", "", "nil");
     }
