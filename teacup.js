@@ -471,6 +471,24 @@ Teacup.handlers.push({
     }
 });
 
+// Object notation {x = 1, y = 2}
+Teacup.handlers.push({
+  key: "_ { E } _",
+  func: function(node, env, rawDecls) {
+      var decls = getList(rawDecls)
+          .map(d => normalizeAssignment(d));
+      var newEnv = Object.create(env);
+      for (var decl of decls) {
+          var value =
+              decl[1]
+              ? buildFunction(this, decl[1], decl[2], newEnv)
+              : this.eval(decl[2], env);
+          variableBinder(decl[0], newEnv)(value);
+      }
+      return newEnv;
+  }
+});
+
 // Empty list
 Teacup.handlers.push({
     key: "_ [ _ ] _",
