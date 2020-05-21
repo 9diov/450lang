@@ -251,8 +251,8 @@ var Teacup = {};
 
 Teacup.tokenDefinitions = {
     number: "\\d+(?:\\.\\d+)?(?:[eE][+-]?\\d+)?",
-    open: "[\\(\\[\\{]|\\b(?:let|for|if|begin)\\b",
-    middle: "\\b(?:then|elif|else|in|do|when)\\b",
+    open: "[\\(\\[\\{]|\\b(?:let|from|if|begin)\\b",
+    middle: "\\b(?:then|elif|else|in|do|where|select)\\b",
     close: "[\\)\\]\\}]|\\bend\\b",
     infix: "[,;\n]|[!@$%^&*|/?.:~+=<>-]+|\\b(?:and|or|not)\\b",
     word: "\\w+",
@@ -566,17 +566,17 @@ function forHandler(v, list, cond, body, env) {
     return results;
 }
 
-// for x in y do z end
+// from x in y select z end
 Teacup.handlers.push({
-    key: "_ for E in E do E end _",
+    key: "_ from E in E select E end _",
     func: function (node, env, v, list, body) {
         return forHandler.call(this, v, list, null, body, env);
     }
 });
 
-// for x in y when c do z end
+// from x in y where c select z end
 Teacup.handlers.push({
-    key: "_ for E in E when E do E end _",
+    key: "_ from E in E where E select E end _",
     func: function (node, env, v, list, cond, body) {
         return forHandler.call(this, v, list, cond, body, env);
     }
