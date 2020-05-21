@@ -471,21 +471,47 @@ Teacup.handlers.push({
     }
 });
 
+// Make object iterable
+function iterator() {
+    var keys = [];
+    var ref = this;
+    for (var key in this) {
+      if (ref.hasOwnProperty(key))
+        keys.push(key);
+    }
+
+    return {
+        next: function() {
+            if (this._keys && this._obj && this._index < this._keys.length) {
+                var key = this._keys[this._index];
+                this._index++;
+                return { key: key, value: [key, this._obj[key]], done: false };
+            } else {
+                return { done: true };
+            }
+        },
+        _index: 0,
+        _keys: keys,
+        _obj: ref
+    };
+}
+
 // Object notation {x = 1, y = 2}
 Teacup.handlers.push({
   key: "_ { E } _",
   func: function(node, env, rawDecls) {
       var decls = getList(rawDecls)
           .map(d => normalizeAssignment(d));
-      var newEnv = Object.create(env);
+      var obj = Object.create({});
       for (var decl of decls) {
           var value =
               decl[1]
-              ? buildFunction(this, decl[1], decl[2], newEnv)
+              ? buildFunction(this, decl[1], decl[2], obj)
               : this.eval(decl[2], env);
-          variableBinder(decl[0], newEnv)(value);
+          variableBinder(decl[0], obj)(value);
       }
-      return newEnv;
+      obj[Symbol.iterator] = iterator;
+      return obj;
   }
 });
 
