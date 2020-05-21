@@ -235,7 +235,6 @@ function tagPrefixOperators(tokens) {
         else
             prevType = token.type;
     }
-    console.log(tokens);
     return tokens;
 }
 
@@ -321,7 +320,6 @@ Teacup.priorities = {
     "type:number":   xassoc(20005),
     "type:string":   xassoc(20005),
 };
-console.log(Teacup.priorities)
 
 
 // ROOT ENVIRONMENT

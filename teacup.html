@@ -90,7 +90,9 @@ end
 </textarea>
 <textarea class="ex">
 # LINQ style query on list
-let square(x) = x * x in
+let
+  square(x) = x * x
+in
   from x in [1, 2, 3, 4, 5]
   where x % 2 == 0
   select square(x)
@@ -115,11 +117,11 @@ end
 </textarea>
 <textarea class="ex">
 # Test closures on iteration variable
-let fns = from i in 1..10 do
+let fns = from i in 1..10 select
   x -> x + i
   end
 in
-  from fn in fns do
+  from fn in fns select
     fn(3)
   end
 end
